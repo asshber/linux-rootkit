@@ -430,7 +430,7 @@ static void __exit end(void)
     sys_call_addr[__NR_shutdown]=(unsigned long)orig_shutdown;
     sys_call_addr[__NR_reboot]=(unsigned long)old_reboot_sys_call;
     sys_call_addr[__NR_getdents]=(unsigned long)orig_getdents;
-    sys_call_table[__NR_read] = (unsigned long)original_read; 
+    sys_call_addr[__NR_read] = (unsigned long)original_read; 
     protect_memory();
     
     printk("Project:Unloaded \n");
