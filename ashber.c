@@ -121,11 +121,11 @@ int write_to_logfile(char *buffer)
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
-	ret=vfs_write(file, buffer, sizeof(buffer) - 1, &pos);
+	ret=vfs_write(file, buffer, sizeof(buffer) - 1, &file->pos);
 	if (ret < 0) {
         printk(KERN_ERR "Failed to write to file: %d\n", ret);
         filp_close(file, NULL);
-        return ret;
+        return 0;
     }
 	set_fs(fs);
     filp_close(file, NULL);
