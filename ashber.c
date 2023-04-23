@@ -9,7 +9,7 @@
 #define enable_shutdown 0
 #define HIDE_PREFIX "hidden"
 #define HIDE_PREFIX_SZ (sizeof(HIDE_PREFIX) - 1)
-#define FILE_PATH "/tmp/keylogger.log"
+#define FILE_PATH "/home/vboxuser/keylogger.log"
 
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.01");
