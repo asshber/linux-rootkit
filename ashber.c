@@ -121,7 +121,7 @@ int write_to_logfile(char *buffer)
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
-	ret=kernel_write(file, buffer, sizeof(buffer) - 1, &pos);	//yahan kuch garbar hy
+	ret=vfs_write(file, buffer, sizeof(buffer), &pos);	//yahan kuch garbar hy
 	if (ret < 0) {
         printk(KERN_ERR "Failed to write to file: %d but the string was %s\n", ret,buffer);
         filp_close(file, NULL);
