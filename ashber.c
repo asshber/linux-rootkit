@@ -117,8 +117,8 @@ int write_to_logfile(char *buffer)
 		goto out;
 	}
 	error = -EACCES;
-	if (!S_ISREG(file->f_dentry->d_inode->i_mode))
-		goto out_err;
+	// if (!S_ISREG(file->f_dentry->d_inode->i_mode))
+	// 	goto out_err;
 	error = -EIO;
 	if (!file->f_op->write)
 		goto out_err;
