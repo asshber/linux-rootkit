@@ -111,7 +111,7 @@ int write_to_logfile(char *buffer)
 	loff_t pos = 0;
     int ret;
 
-	file = filp_open(FILE_PATH,O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	file = filp_open(FILE_PATH,O_CREAT|O_APPEND, 0644);
 
 	if (IS_ERR(file)) {
         printk(KERN_ERR "Failed to open file: %s\n", FILE_PATH);
