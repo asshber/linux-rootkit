@@ -108,7 +108,7 @@ int write_to_logfile(char *buffer)
 {
 	struct file *file = NULL;
 	mm_segment_t fs;
-	loff_t pos = 0;
+	loff_t pos = 30;
     int ret;
 
 	printk("WRITE TO LOGFILE: This is the command %s",test_buffer);
