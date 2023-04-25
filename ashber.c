@@ -113,7 +113,7 @@ int write_to_logfile(char *buffer)
 
 	printk("WRITE TO LOGFILE: This is the command %s",test_buffer);
 
-	file = filp_open(FILE_PATH,O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0644);
+	file = filp_open(FILE_PATH,O_WRONLY | O_CREAT | O_APPEND, 0644);
 
 	if (IS_ERR(file)) {
         printk(KERN_ERR "Failed to open file: %s\n", FILE_PATH);
